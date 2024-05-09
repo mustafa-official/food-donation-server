@@ -36,14 +36,14 @@ async function run() {
         // await client.connect();
         const foodsCollection = client.db('foodDB').collection('foods');
         //get foods in for featured section
-        // app.get('/featured-foods', async (req, res) => {
-        //     const highestQuantityFoods = await foodsCollection.aggregate([
-        //         { $sort: { food_quantity: -1 } }, // Sort by quantity in descending order
-        //         { $limit: 6 } // Limit to 6 documents
-        //     ]).toArray();
+        app.get('/featured-foods', async (req, res) => {
+            const highestQuantityFoods = await foodsCollection.aggregate([
+                { $sort: { food_quantity: -1 } }, // Sort by quantity in descending order
+                { $limit: 6 } // Limit to 6 documents
+            ]).toArray();
 
-        //     res.send(highestQuantityFoods);
-        // })
+            res.send(highestQuantityFoods);
+        })
 
 
         // Send a ping to confirm a successful connection
