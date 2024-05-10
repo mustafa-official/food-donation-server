@@ -79,6 +79,22 @@ async function run() {
             res.send(result);
         })
 
+        //update food
+        app.put('/update-food/:id', async (req, res) => {
+            const id = req.params.id;
+            const foodInfo = req.body;
+            const filter = { _id: new ObjectId(id) };
+            const options = { upsert: true };
+            const updateFood = {
+                $set: {
+                    ...foodInfo,
+                }
+            }
+            const result = await foodsCollection.updateOne(filter, updateFood, options);
+            res.send(result);
+
+        })
+
         //food request
         app.get("/food-request/:email", async (req, res) => {
             const email = req.params.email;
