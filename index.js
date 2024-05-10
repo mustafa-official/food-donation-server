@@ -101,6 +101,14 @@ async function run() {
             res.send(result);
         })
 
+        //food delete
+        app.delete('/remove-food/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await foodsCollection.deleteOne(query);
+            res.send(result);
+        })
+
         //add food
         app.post('/add-food', async (req, res) => {
             const foodInfo = req.body;
