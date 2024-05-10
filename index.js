@@ -82,8 +82,29 @@ async function run() {
         //food request
         app.get("/food-request/:email", async (req, res) => {
             const email = req.params.email;
-            const filter = { user_email: email };
+            const filter = {
+                user_email: email,
+                food_status: "Requested"
+            };
             const result = await foodsCollection.find(filter).toArray();
+            res.send(result);
+        })
+
+        //manage my food
+        app.get("/manage-food/:email", async (req, res) => {
+            const email = req.params.email;
+            const filter = {
+                donator_email: email,
+                food_status: "available"
+            };
+            const result = await foodsCollection.find(filter).toArray();
+            res.send(result);
+        })
+
+        //add food
+        app.post('/add-food', async (req, res) => {
+            const foodInfo = req.body;
+            const result = await foodsCollection.insertOne(foodInfo);
             res.send(result);
         })
 
