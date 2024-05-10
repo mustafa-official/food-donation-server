@@ -2,7 +2,7 @@ const express = require('express');
 require('dotenv').config();
 const cors = require('cors');
 const app = express();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 
 const corsOptions = {
@@ -43,6 +43,48 @@ async function run() {
             ]).toArray();
 
             res.send(highestQuantityFoods);
+        })
+
+        //get specific foods
+        app.get("/details/:id", async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await foodsCollection.findOne(query);
+            res.send(result)
+        })
+
+        //get available food status
+        app.get('/available', async (req, res) => {
+            const query = { food_status: 'available' };
+            const result = await foodsCollection.find(query).toArray();
+            res.send(result);
+        })
+
+        //update and request food
+        app.put('/update-status/:id', async (req, res) => {
+            const id = req.params.id;
+            const newStatus = req.body;
+            // console.log(newStatus);
+            const filter = { _id: new ObjectId(id) };
+            const options = { upsert: true };
+            const updateStatus = {
+                $set: {
+                    additional_notes: newStatus.additional_notes,
+                    food_status: newStatus.food_status,
+                    request_date: newStatus.request_date,
+                    user_email: newStatus.user_email,
+                }
+            }
+            const result = await foodsCollection.updateOne(filter, updateStatus, options);
+            res.send(result);
+        })
+
+        //food request
+        app.get("/food-request/:email", async (req, res) => {
+            const email = req.params.email;
+            const filter = { user_email: email };
+            const result = await foodsCollection.find(filter).toArray();
+            res.send(result);
         })
 
 
