@@ -55,8 +55,26 @@ async function run() {
 
         //get available food status
         app.get('/available', async (req, res) => {
-            const query = { food_status: 'available' };
-            const result = await foodsCollection.find(query).toArray();
+            const search = req.query.search;
+            const sort = req.query.sort;
+            console.log(sort);
+            let query = {
+                food_name: { $regex: search, $options: 'i' }
+            }
+            const filter = { food_status: 'available' };
+            if (filter) {
+                query = { ...query, ...filter };
+            }
+
+            // for sorting 
+            let sortOptions = {};
+            if (sort === 'asc') {
+                sortOptions = { expired_date: 1 }; // Ascending order by expired_date
+            } else if (sort === 'des') {
+                sortOptions = { expired_date: -1 }; // Descending order by expired_date
+            }
+
+            const result = await foodsCollection.find(query).sort(sortOptions).toArray();
             res.send(result);
         })
 
@@ -124,6 +142,8 @@ async function run() {
             const result = await foodsCollection.deleteOne(query);
             res.send(result);
         })
+
+
 
         //add food
         app.post('/add-food', async (req, res) => {
