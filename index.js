@@ -21,10 +21,17 @@ app.use(cors(corsOptions))
 app.use(express.json());
 app.use(cookieParser());
 
+// another middleware
+const logger = (req, res, next) => {
+    console.log('log info', req.method, req.url);
+    next();
+}
+
 //jwt verify token middleware
 const verifyToken = (req, res, next) => {
-    const token = req.cookies?.token;
-    // console.log(token);
+    const token = req.cookies.token;
+
+    console.log('1', token);
     if (!token) return res.status(401).send({ message: 'unauthorized access' })
     if (token) {
         jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
@@ -60,7 +67,7 @@ async function run() {
 
 
         //jwt generate
-        app.post("/jwt", async (req, res) => {
+        app.post("/jwt", logger, async (req, res) => {
             const user = req.body;
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
                 expiresIn: "365d"
@@ -85,10 +92,6 @@ async function run() {
         })
 
 
-
-
-
-
         //get foods in for featured section
         app.get('/featured-foods', async (req, res) => {
             const highestQuantityFoods = await foodsCollection.aggregate([
@@ -111,7 +114,7 @@ async function run() {
         app.get('/available', async (req, res) => {
             const search = req.query.search;
             const sort = req.query.sort;
-            console.log(sort);
+            // console.log(sort);
             let query = {
                 food_name: { $regex: search, $options: 'i' }
             }
@@ -168,8 +171,13 @@ async function run() {
         })
 
         //food request
-        app.get("/food-request/:email", async (req, res) => {
+        app.get("/food-request/:email", logger, verifyToken, async (req, res) => {
+            const tokenEmail = req.user.email;
             const email = req.params.email;
+            if (tokenEmail !== email) {
+                return res.status(403).send({ message: 'forbidden access' })
+            }
+
             const filter = {
                 user_email: email,
                 food_status: "Requested"
@@ -179,8 +187,12 @@ async function run() {
         })
 
         //manage my food
-        app.get("/manage-food/:email", async (req, res) => {
+        app.get("/manage-food/:email", logger, verifyToken, async (req, res) => {
+            const tokenEmail = req?.user?.email;
             const email = req.params.email;
+            if (tokenEmail !== email) {
+                return res.status(403).send({ message: 'forbidden access' })
+            }
             const filter = {
                 donator_email: email,
                 food_status: "available"
