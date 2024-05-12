@@ -23,7 +23,7 @@ app.use(cookieParser());
 
 // another middleware
 const logger = (req, res, next) => {
-    console.log('log info', req.method, req.url);
+    // console.log('log info', req.method, req.url);
     next();
 }
 
@@ -31,7 +31,7 @@ const logger = (req, res, next) => {
 const verifyToken = (req, res, next) => {
     const token = req.cookies.token;
 
-    console.log('1', token);
+    // console.log('1', token);
     if (!token) return res.status(401).send({ message: 'unauthorized access' })
     if (token) {
         jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
@@ -39,7 +39,7 @@ const verifyToken = (req, res, next) => {
                 console.log(err);
                 return res.status(401).send({ message: 'unauthorized access' })
             }
-            console.log(decoded);
+            // console.log(decoded);
             req.user = decoded;
             next();
         })
