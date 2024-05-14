@@ -9,7 +9,9 @@ const port = process.env.PORT || 5000;
 
 const corsOptions = {
     origin: [
-        'http://localhost:5173'
+        "http://localhost:5173",
+        "https://assignment-eleven-d78bd.web.app",
+        "https://assignment-eleven-d78bd.firebaseapp.com"
     ],
     credentials: true,
     optionSuccessStatus: 200,
@@ -22,15 +24,15 @@ app.use(express.json());
 app.use(cookieParser());
 
 // another middleware
-const logger = (req, res, next) => {
-    // console.log('log info', req.method, req.url);
-    next();
-}
+// const logger = (req, res, next) => {
+//     console.log('log info', req.method, req.url);
+//     next();
+// }
 
 //jwt verify token middleware
 const verifyToken = (req, res, next) => {
-    const token = req.cookies.token;
-
+    const token = req.cookies?.token;
+    console.log(token);
     // console.log('1', token);
     if (!token) return res.status(401).send({ message: 'unauthorized access' })
     if (token) {
@@ -66,11 +68,11 @@ async function run() {
         const foodsCollection = client.db('foodDB').collection('foods');
 
 
-        //jwt generate
-        app.post("/jwt", logger, async (req, res) => {
+        //jwt generate using (logger)
+        app.post("/jwt", async (req, res) => {
             const user = req.body;
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-                expiresIn: "365d"
+                expiresIn: "1h"
             })
             res.cookie('token', token, {
                 httpOnly: true,
@@ -81,15 +83,38 @@ async function run() {
         })
 
         //clear cookie on logout user
-        app.get('/logout', (req, res) => {
-            res.clearCookie('token', {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-                maxAge: 0,
-            })
+        // app.post('/logout', (req, res) => {
+        //     const user = req.body;
+        //     console.log("logging out", user);
+        //     res.clearCookie('token', {
+        //         httpOnly: true,
+        //         secure: process.env.NODE_ENV === "production",
+        //         sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+        //         maxAge: 0,
+        //     })
+        //         .send({ success: true })
+        // })
+
+        app.post('/logout', async (req, res) => {
+            const user = req.body;
+            console.log('logging out', user);
+            res
+                .clearCookie('token', { maxAge: 0, sameSite: 'none', secure: true })
                 .send({ success: true })
-        })
+         })
+
+
+
+        // Logout
+        // app.post('/logout', async (req, res) => {
+        //     // const token = req.cookies?.token;
+        //     // console.log(token);
+        //     const user = req.body;
+        //     console.log('logging out', user);
+        //     res
+        //         .clearCookie('token', { maxAge: 0 })
+        //         .send({ success: true })
+        // })
 
 
         //get foods in for featured section
@@ -171,7 +196,7 @@ async function run() {
         })
 
         //food request
-        app.get("/food-request/:email", logger, verifyToken, async (req, res) => {
+        app.get("/food-request/:email", verifyToken, async (req, res) => {
             const tokenEmail = req.user.email;
             const email = req.params.email;
             if (tokenEmail !== email) {
@@ -187,7 +212,7 @@ async function run() {
         })
 
         //manage my food
-        app.get("/manage-food/:email", logger, verifyToken, async (req, res) => {
+        app.get("/manage-food/:email", verifyToken, async (req, res) => {
             const tokenEmail = req?.user?.email;
             const email = req.params.email;
             if (tokenEmail !== email) {
@@ -220,7 +245,7 @@ async function run() {
 
 
         // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 });
+        // await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
@@ -236,5 +261,5 @@ app.get('/', (req, res) => {
 })
 
 app.listen(port, () => {
-    console.log(`Running port is ${port}`);
+    console.log(`Running port is ${port} `);
 })
