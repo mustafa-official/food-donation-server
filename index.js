@@ -78,43 +78,33 @@ async function run() {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-            })
-                .send({ success: true })
+            }).send({ success: true })
         })
 
+
         //clear cookie on logout user
-        // app.post('/logout', (req, res) => {
-        //     const user = req.body;
-        //     console.log("logging out", user);
-        //     res.clearCookie('token', {
-        //         httpOnly: true,
-        //         secure: process.env.NODE_ENV === "production",
-        //         sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-        //         maxAge: 0,
-        //     })
-        //         .send({ success: true })
-        // })
-
-        app.post('/logout', async (req, res) => {
-            const user = req.body;
-            console.log('logging out', user);
-            res
-                .clearCookie('token', { maxAge: 0, sameSite: 'none', secure: true })
-                .send({ success: true })
-         })
+        app.get('/logout', (req, res) => {
+            // const user = req.body;
+            // console.log("logging out", user);
+            res.clearCookie('token', {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+                maxAge: 0,
+            }).send({ success: true })
+        })
 
 
 
-        // Logout
         // app.post('/logout', async (req, res) => {
-        //     // const token = req.cookies?.token;
-        //     // console.log(token);
         //     const user = req.body;
         //     console.log('logging out', user);
         //     res
-        //         .clearCookie('token', { maxAge: 0 })
+        //         .clearCookie('token', { maxAge: 0, sameSite: 'none', secure: true })
         //         .send({ success: true })
         // })
+
+
 
 
         //get foods in for featured section
