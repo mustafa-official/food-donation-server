@@ -129,7 +129,9 @@ async function run() {
         app.get('/available', async (req, res) => {
             const search = req.query.search;
             const sort = req.query.sort;
-            // console.log(sort);
+            const quantity = req.query.quantity;
+    
+
             let query = {
                 food_name: { $regex: search, $options: 'i' }
             }
@@ -144,6 +146,13 @@ async function run() {
                 sortOptions = { expired_date: 1 }; // Ascending order by expired_date
             } else if (sort === 'des') {
                 sortOptions = { expired_date: -1 }; // Descending order by expired_date
+            }
+
+            //for quantity wise 
+            if (quantity === 'five') {
+                query.food_quantity = { $gte: 1, $lte: 5 };
+            } else if (quantity === 'ten') {
+                query.food_quantity = { $gte: 5, $lte: 10 };
             }
 
             const result = await foodsCollection.find(query).sort(sortOptions).toArray();
